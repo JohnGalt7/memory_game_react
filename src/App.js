@@ -42,6 +42,14 @@ export default function App() {
 
 function Card({ propsObj }) {
   const [clicked, setClicked] = useState(0);
+  const [hovered, setHovered] = useState(false);
+
+  function handleMouseEnter() {
+    setHovered(true);
+  }
+  function handleMouseLeave() {
+    setHovered(false);
+  }
 
   function handleClick(id) {
     setClicked(id);
@@ -50,9 +58,9 @@ function Card({ propsObj }) {
   return (
     <div onClick={() => handleClick(propsObj.id)}>
       {clicked === propsObj.id ? (
-        <img className="card" src={propsObj.route} alt={propsObj.name}></img>
+        <img src={propsObj.route} alt={propsObj.name}></img>
       ) : (
-        <div className="blank"></div>
+        <img class="hover-mod" src="pictures/card_back_400.png" alt="card-back"></img>
       )}
     </div>
   );
