@@ -28,46 +28,50 @@ doublePictures = shuffleArray(doublePictures);
 export default function App() {
   const [pictures, setPictures] = useState([...doublePictures]);
   const [score, setScore] = useState(0);
-  const [picName, setPicName] = useState(["p1", "p2"]);
+  // const [picName, setPicName] = useState(["p1", "p2"]);
   const [clicked, setClicked] = useState([0, 0]);
 
-  // Creating the Card Components to render
+  //Derived State
 
-  function createRandomPictureArray() {
-    const cardComponents = pictures.map((pic) => (
-      <Card
-        propsObj={pic}
-        setScore={setScore}
-        picName={picName}
-        setPicName={setPicName}
-        clicked={clicked}
-        setClicked={setClicked}
-        pictures={pictures}
-        setPictures={setPictures}
-        key={pic.id}
-      />
-    ));
-    return cardComponents;
-  }
+  const picName = [
+    ...pictures.filter((el) => el.id === clicked[0]).map((el) => el.name),
+    ...pictures.filter((el) => el.id === clicked[1]).map((el) => el.name),
+  ];
 
   // UI
 
   return (
     <div className="app">
       <header className="header">
-        <h1>Memory Game</h1>
+        <h1 className="title">Memory Game</h1>
       </header>
       <div className="score">
         Your Current Score Is:<p className="pairs">{score}</p>
       </div>
-      <div className="playfield">{createRandomPictureArray()}</div>
+      <div className="playfield">
+        {
+          //creating the cards
+        }
+        {pictures.map((pic) => (
+          <Card
+            propsObj={pic}
+            setScore={setScore}
+            clicked={clicked}
+            setClicked={setClicked}
+            pictures={pictures}
+            setPictures={setPictures}
+            picName={picName}
+            key={pic.id}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
 // Card Component
 
-function Card({ propsObj, setScore, picName, setPicName, clicked, setClicked, pictures, setPictures }) {
+function Card({ propsObj, setScore, clicked, setClicked, pictures, setPictures, picName }) {
   // scoring
 
   function increaseScore() {
@@ -77,7 +81,7 @@ function Card({ propsObj, setScore, picName, setPicName, clicked, setClicked, pi
   // checking if pair is revealed
 
   function checkPair() {
-    if (picName[0] === picName[1]) {
+    if (picName[0] && picName[1] && picName[0] === picName[1]) {
       increaseScore();
       setPictures(() =>
         pictures.map((el) => (el.id === clicked[0] || el.id === clicked[1] ? { ...el, found: true } : { ...el }))
@@ -89,26 +93,25 @@ function Card({ propsObj, setScore, picName, setPicName, clicked, setClicked, pi
 
   function handleClick(propsObj) {
     if (propsObj.found) return;
-    checkPair();
     setClicked(([p1, p2]) => {
-      if (!p1) {
-        setPicName(([n1, n2]) => [propsObj.name, n2]);
-        return [propsObj.id, 0];
-      }
+      if (!p1) return [propsObj.id, 0];
+      if (propsObj.id === p1) return [p1, 0];
       if (p1 && !p2) {
-        setPicName(([n1, n2]) => [n1, propsObj.name]);
         return [p1, propsObj.id];
-      } else {
-        setPicName(["p1", "p2"]);
-        return [0, 0];
-      }
+      } else return [0, 0];
     });
+    checkPair();
   }
 
   // conditional rendering of a Card or a Card-back
 
   return (
-    <div onClick={() => handleClick(propsObj)}>
+    <div
+      className="card"
+      onClick={() => {
+        handleClick(propsObj);
+      }}
+    >
       {clicked[0] === propsObj.id || clicked[1] === propsObj.id || propsObj.found === true ? (
         <img src={propsObj.route} alt={propsObj.name}></img>
       ) : (
@@ -123,5 +126,6 @@ function Card({ propsObj, setScore, picName, setPicName, clicked, setClicked, pi
   // Ending text and restart button
   // Try counter
   // Improved scoring based on clicks and elapsed time (?)
-  // Now the third click turns the cards back if not a pair, maybe it should be automatic with delay and animation (?)
+  // Basic turning animation
+  // UseEffect() for automatically checking pairs and turning back non-pairs after delay
 }
